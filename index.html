@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dr. Singh's EP Sim</title>
+  <meta name="description" content="Educational electrophysiology study and pacing simulator. Not for clinical use. No patient data." />
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand">Dr. Singh's EP<span>Sim</span></div>
+    <nav id="modeTabs" aria-label="Mode">
+      <button data-mode="explore" class="active">EP lab</button>
+      <button data-mode="pacer">Pacemaker lab</button>
+      <button data-mode="quiz">Name the finding</button>
+      <button data-mode="place">Place the catheters</button>
+      <button data-mode="cases">Cases</button>
+      <button id="navLearn" class="learn-tab">Learn</button>
+      <button id="navModel" class="learn-tab">Model &amp; limits</button>
+      <button id="navAbout" class="learn-tab">About</button>
+    </nav>
+    <div class="tools">
+      <button id="btnTruth" title="Show what really happened in the heart: blocks, concealed conduction, capture (T)">Truth <kbd>T</kbd></button>
+      <button id="btnWires" class="on" title="Show the conduction system on the 3D heart (C)">Conduction <kbd>C</kbd></button>
+      <button id="btnLabels" class="on" title="Labels on the 3D heart (L)">Labels <kbd>L</kbd></button>
+      <button id="btnFreeze" title="Freeze the recording (F)">Freeze <kbd>F</kbd></button>
+      <button id="btnCaliper" title="Calipers: drag either line to measure an interval (K)">Calipers <kbd>K</kbd></button>
+      <button id="btnTour" title="Guided tour">Tour</button>
+      <button id="btnHelp" title="Help (H)">Help <kbd>H</kbd></button>
+    </div>
+  </header>
+
+  <main id="split">
+    <section id="monitorPane" aria-label="EP recording system">
+      <canvas id="recorder"></canvas>
+      <div id="intervals" aria-live="polite"></div>
+      <div id="frozen" class="chip warn" hidden>FROZEN</div>
+      <div id="notice" hidden></div>
+    </section>
+
+    <section id="heartPane" aria-label="3D heart">
+      <div id="heartMount"></div>
+      <div id="heartLabels"></div>
+      <div class="chip" id="chipHeart">3D HEART · ACTIVATION</div>
+      <div id="paneBtns">
+        <label title="Slow the heart down to watch the impulse travel">Speed
+          <select id="speed"><option value="1">1×</option><option value="0.5">½×</option><option value="0.2">⅕×</option><option value="0.1">⅒×</option></select></label>
+        <button id="btnView" title="Reset the 3D view">Reset view</button>
+      </div>
+      <ol id="truth" hidden aria-label="Ground truth: what the heart did"></ol>
+    </section>
+  </main>
+
+  <section id="learn" aria-label="Learn"></section>
+  <section id="page" class="learn-body" aria-label="Page"></section>
+  <section id="modePanel">
+    <div id="task" hidden></div>
+    <div id="pmCtl" class="ctl" hidden>
+      <div class="grp">
+        <label>Patient <select id="pmSub"></select></label>
+        <label>Sinus rate <input id="sinus" type="number" min="30" max="170" step="5" value="75"> /min</label>
+        <button id="btnPVC" title="Give the patient one premature ventricular beat (V)">PVC <kbd>V</kbd></button>
+        <button id="btnNoise" title="Arm muscle activity near the generator: myopotential noise on the ventricular lead (N)">Myopotentials <kbd>N</kbd></button>
+        <p id="pmBlurb"></p>
+      </div>
+      <div class="grp stim" aria-label="Pacemaker programmer">
+        <span class="cap">PROGRAMMER</span>
+        <label>Mode <select id="pmMode"><option>DDD</option><option>VVI</option><option>AAI</option><option>DOO</option><option>VOO</option><option>AOO</option></select></label>
+        <label>Lower rate <input data-pm="lrl" type="number" min="30" max="120" step="5"> /min</label>
+        <label class="dd">Upper rate <input data-pm="url" type="number" min="80" max="180" step="5"> /min</label>
+        <label class="dd">AV delay paced <input data-pm="pav" type="number" min="50" max="350" step="10"> sensed <input data-pm="sav" type="number" min="50" max="350" step="10"> ms</label>
+        <label class="dd">PVARP <input data-pm="pvarp" type="number" min="150" max="500" step="10"> ms</label>
+        <label class="sa">A sens <input data-pm="sensA" type="number" min="0.1" max="10" step="0.1"> mV</label>
+        <label class="sv">V sens <input data-pm="sensV" type="number" min="0.5" max="15" step="0.5"> mV</label>
+        <label class="pa">A out <input data-pm="outA" type="number" min="0" max="7.5" step="0.1"> V</label>
+        <label class="pv">V out <input data-pm="outV" type="number" min="0" max="7.5" step="0.1"> V</label>
+        <label>Width <input data-pm="pw" type="number" min="0.1" max="1.5" step="0.1"> ms</label>
+        <label class="dd">V blanking <input data-pm="vBlank" type="number" min="0" max="60" step="2"> ms</label>
+        <label class="dd" title="Ventricular safety pacing"><input data-pm="safety" type="checkbox"> Safety pacing</label>
+      </div>
+    </div>
+    <div id="epCtl" class="ctl">
+    <div class="grp">
+      <label>Heart <select id="substrate"></select></label>
+      <p id="subBlurb"></p>
+    </div>
+    <div class="grp stim" aria-label="Stimulator">
+      <span class="cap">STIMULATOR</span>
+      <label>Pace from <select id="paceSite"></select></label>
+      <label>Output <input id="mA" type="number" min="0.1" max="20" step="0.1" value="2"> mA</label>
+      <label>Width <input id="pw" type="number" min="0.1" max="2" step="0.1" value="1"> ms</label>
+      <label>Protocol <select id="protocol">
+        <option value="pace">Pace (continuous S1)</option>
+        <option value="extra">Drive train + extrastimuli</option>
+        <option value="burst">Burst</option>
+      </select></label>
+      <label>S1 <input id="s1" type="number" min="150" max="1500" step="10" value="600"> ms</label>
+      <label class="x">× <input id="n" type="number" min="1" max="20" step="1" value="8"></label>
+      <label class="x">S2 <input id="s2" type="number" min="0" max="1000" step="10" value="400"> ms</label>
+      <label class="x">S3 <input id="s3" type="number" min="0" max="800" step="10" value="0"> ms</label>
+      <label class="b">for <input id="dur" type="number" min="500" max="15000" step="500" value="3000"> ms</label>
+      <button id="btnGo" class="primary" title="Start the protocol (Space)">Deliver <kbd>Space</kbd></button>
+      <button id="btnDec" title="Shorten S2 by 10 ms and deliver again (D)">S2 −10 <kbd>D</kbd></button>
+      <button id="btnStop" title="Stop pacing (S)">Stop <kbd>S</kbd></button>
+    </div>
+    </div>
+  </section>
+  <footer id="disclaimer">Educational use only. Not a medical device. Not for clinical decisions, procedure planning, assessment or exams. All cases are simulated. Never enter patient information.</footer>
+
+  <div id="help" hidden>
+    <div class="card">
+      <h2>EP and Pacing Simulator</h2>
+      <p class="warn">Educational use only. Not a medical device, not for clinical use or interpretation. No patient data.</p>
+      <table>
+        <tr><td><kbd>Space</kbd></td><td>Deliver the protocol set in the stimulator</td></tr>
+        <tr><td><kbd>D</kbd></td><td>Shorten S2 by 10 ms and deliver again (the S1–S2 decrement)</td></tr>
+        <tr><td><kbd>S</kbd></td><td>Stop pacing</td></tr>
+        <tr><td><kbd>F</kbd></td><td>Freeze / unfreeze the recording</td></tr>
+        <tr><td><kbd>K</kbd></td><td>Calipers: drag either green line; the interval shows between them</td></tr>
+        <tr><td><kbd>T</kbd></td><td>Truth: list what really happened in the heart (block, concealed conduction, capture)</td></tr>
+        <tr><td><kbd>C</kbd> / <kbd>L</kbd></td><td>Conduction system / labels on the 3D heart</td></tr>
+        <tr><td><kbd>1</kbd>–<kbd>4</kbd></td><td>Speed: 1×, ½×, ⅕×, ⅒× (watch the impulse travel)</td></tr>
+        <tr><td><kbd>V</kbd> / <kbd>N</kbd></td><td>Pacemaker lab: give a PVC / myopotential noise on and off</td></tr>
+        <tr><td><kbd>M</kbd></td><td>Switch between the EP lab and the pacemaker lab</td></tr>
+        <tr><td><kbd>1</kbd>–<kbd>4</kbd>, <kbd>Enter</kbd></td><td>Name the finding: answer, then next question</td></tr>
+        <tr><td><kbd>W</kbd> / <kbd>S</kbd>, <kbd>Tab</kbd></td><td>Place the catheters: advance / withdraw the selected catheter, select the next one</td></tr>
+        <tr><td><kbd>H</kbd></td><td>This help</td></tr>
+      </table>
+      <h3>Tips</h3>
+      <ul>
+        <li>Read the His channel: A (septal atrium), H (His spike), V. AH is AV nodal conduction; HV is His–Purkinje conduction.</li>
+        <li>Find the AV nodal ERP: drive train at 600 ms with an S2 at 400, then press D repeatedly until the S2 no longer reaches the His.</li>
+        <li>Slow the speed to ⅕× to watch where each beat goes on the 3D heart.</li>
+        <li>Drag in the right panel to rotate the heart; scroll to zoom.</li>
+      </ul>
+      <p class="hint">Press <kbd>H</kbd> or click to close.</p>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

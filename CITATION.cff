@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Dr. Singh's EP Simulator: an open educational electrophysiology study and pacing simulator"
+type: software
+authors:
+  - family-names: Singh
+    given-names: Aditya
+version: 0.1.0
+date-released: 2026-10-29
+license: MIT
+repository-code: "https://github.com/dradityaaiims-cloud/ep-sim"
+url: "https://dradityaaiims-cloud.github.io/ep-sim/"
+keywords: [cardiac electrophysiology, EP study, intracardiac electrograms, programmed stimulation, AVNRT, accessory pathway, pacemaker, medical education, simulation, three.js]
