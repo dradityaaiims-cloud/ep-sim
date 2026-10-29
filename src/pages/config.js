@@ -1,8 +1,8 @@
 // Site settings for the About page. Nothing here is secret.
 export const CONFIG = {
-  version: '0.1.0',
+  version: '1.0.1',
   year: 2026,
-  doi: '',
+  doi: '10.5281/zenodo.23751660',
   title: "Dr. Singh's EP Simulator: an open educational electrophysiology study and pacing simulator",
   // Contact email split so it is not plain text in the page source (reduces scraping).
   emailUser: 'draditya.aiims',

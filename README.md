@@ -4,6 +4,8 @@ An open, browser-based **electrophysiology study and pacemaker simulator** for s
 Pace a simulated heart from four standard catheters, watch the impulse travel on a 3D heart while the intracardiac
 electrograms and surface ECG unfold, then program a generic pacemaker in the same heart.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23751660.svg)](https://doi.org/10.5281/zenodo.23751660)
+
 **Live:** https://dradityaaiims-cloud.github.io/ep-sim/
 
 > Educational use only. Not a medical device. Not for clinical decisions, procedure planning, assessment or exams. All cases are simulated. Never enter patient information.
@@ -54,4 +56,4 @@ not reproduce any manufacturer's device. Not validated for clinical use; educati
 ## Data and licence
 
 Code: MIT (see `LICENSE`). 3D heart: NIH Human Reference Atlas (HuBMAP) male heart v1.2, CC BY 4.0 (see
-`public/models/ATTRIBUTION.md`). Cite via `CITATION.cff`.
+`public/models/ATTRIBUTION.md`). Cite via `CITATION.cff`: DOI [10.5281/zenodo.23751660](https://doi.org/10.5281/zenodo.23751660).
