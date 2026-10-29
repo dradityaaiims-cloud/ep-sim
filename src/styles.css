@@ -301,3 +301,4 @@ body { grid-template-columns: minmax(0, 1fr); }
 body.hide-ctl #epCtl, body.hide-ctl #pmCtl { display: none; }
 body.hide-sub #epCtl > .grp:first-child, body.hide-sub #pmCtl > .grp:first-child { display: none; }
 .tools button:disabled { opacity: 0.35; cursor: not-allowed; }
+#frozen { top: auto; right: auto; } /* the earlier top/right rule plus this left/bottom one stretched the chip into a pane-sized pill */
